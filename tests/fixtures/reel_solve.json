@@ -1,0 +1,20 @@
+{
+  "id": "reel_001",
+  "source": "Transcribed from the on-screen reconstruction in cubiq's promo reel. Verified by simulation: scramble + inspection rotation + solution ends solved, and every stage ends on the listed turn.",
+  "scramble": "B R2 D2 B' R L' F D B' U2 B' L2 U2 B R2 D2 B D2 B' U",
+  "inspection_rotation": "x2 y",
+  "inspection_rotation_note": "Same orientation as z2 y': yellow on top, red in front. Compare orientations, not strings.",
+  "time_s": 8.31,
+  "cross_color": "white",
+  "steps": [
+    {"name": "cross", "moves": "L R' F D L D", "turns": 6, "rotations": 0, "ends_after_turn": 6},
+    {"name": "f2l1", "moves": "F' U' F U' R U R'", "turns": 7, "rotations": 0, "ends_after_turn": 13, "slot": ["green", "red"]},
+    {"name": "f2l2", "moves": "U' R' U' R U' R' U R", "turns": 8, "rotations": 0, "ends_after_turn": 21, "slot": ["green", "orange"]},
+    {"name": "f2l3", "moves": "U2 L' U L2 U' L'", "turns": 6, "rotations": 0, "ends_after_turn": 27, "slot": ["blue", "orange"]},
+    {"name": "f2l4", "moves": "y' U' R U' R' U R U R'", "turns": 8, "rotations": 1, "ends_after_turn": 35, "slot": ["blue", "red"]},
+    {"name": "oll", "moves": "U' R' F' L F' L' F L F' L' F2 R", "turns": 12, "rotations": 0, "ends_after_turn": 47, "case": "OLL 53"},
+    {"name": "pll", "moves": "R U R' U R' U' R2 U' R' U R' U R U2", "turns": 14, "rotations": 0, "ends_after_turn": 61, "case": "Ua"}
+  ],
+  "totals": {"turns": 61, "rotations": 1, "tps": 7.34},
+  "case_check_note": "OLL 53 and Ua match cubiq's labels. Both were checked against reference algorithms: r' U' R U' R' U R U' R' U2 r (OLL 53) and R U' R U R U R U' R' U' R2 (Ua)."
+}
