@@ -12,10 +12,30 @@ brew install uv ffmpeg     # uv manages Python; ffmpeg/ffprobe read and write vi
 uv sync                    # creates .venv with Python 3.12 and all dependencies
 ```
 
+Keep the project outside iCloud-synced folders such as `~/Documents`. iCloud marks the files
+in `.venv` as hidden, which makes Python skip the editable install and breaks `import cubetrace`.
+
 ## Use
 
+Analyse a typed solve. This writes `analysis.json` and `report.html`, which has a scorecard,
+stage splits with slots and OLL/PLL cases, the score breakdown, and a 3D replay:
+
 ```sh
-uv run cubetrace --help
+uv run cubetrace analyze --scramble "B R2 D2 ..." --solution "L R' F D ..." --time 8.31 --out out/solve1
+```
+
+Add `--move-times times.json` (a list of `[start_s, end_s]` pairs, one per solution move,
+measured from the timer start) to get per-stage durations and the pauses part of the score.
+
+Write a page showing every OLL and PLL case, to check the case tables by eye:
+
+```sh
+uv run cubetrace cases --out out/
+```
+
+Development:
+
+```sh
 uv run pytest -q                                      # tests
 uv run ruff check . && uv run ruff format --check .   # lint
 ```

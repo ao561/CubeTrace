@@ -159,6 +159,49 @@ def is_solved(state: np.ndarray, ignore_orientation: bool = False) -> bool:
     return bool((faces == faces[:, 4:5]).all())
 
 
+# --- Pieces and centre-relative colours -----------------------------------------------------
+FACE_OF = np.arange(54) // 9  # face index (0..5 in URFDLB order) of each facelet position
+FACE_OF.setflags(write=False)
+
+
+def opposite(face: int) -> int:
+    """Opposite face index (U<->D, R<->L, F<->B in URFDLB order)."""
+    return (face + 3) % 6
+
+
+def _pieces() -> tuple[tuple[tuple[int, ...], ...], tuple[tuple[int, ...], ...]]:
+    groups: dict[tuple[int, ...], list[int]] = {}
+    for i, p in enumerate(_POS):
+        groups.setdefault(tuple(int(c) for c in p), []).append(i)
+    edges = tuple(tuple(g) for g in groups.values() if len(g) == 2)
+    corners = tuple(tuple(g) for g in groups.values() if len(g) == 3)
+    return edges, corners
+
+
+EDGES, CORNERS = _pieces()  # facelet index groups: 12 pairs and 8 triples
+
+
+def relative(state: np.ndarray) -> np.ndarray:
+    """Recolour each sticker as the index of the face whose centre currently has its colour.
+
+    This removes whole-cube orientation and the colour scheme: a piece is solved relative to
+    the centres exactly when relative(state)[f] == FACE_OF[f] for each of its facelets.
+    """
+    lut = np.empty(6, dtype=np.uint8)
+    lut[state[CENTRES]] = np.arange(6, dtype=np.uint8)
+    return lut[state]
+
+
+def piece_solved(rel: np.ndarray, piece: tuple[int, ...]) -> bool:
+    """Whether a piece is solved, given a centre-relative state from `relative`."""
+    return all(rel[f] == FACE_OF[f] for f in piece)
+
+
+def face_with_centre(state: np.ndarray, colour: int) -> int:
+    """Face index (URFDLB order) whose centre currently has `colour`."""
+    return int(np.flatnonzero(state[CENTRES] == colour)[0])
+
+
 # --- Whole-cube orientations ----------------------------------------------------------------
 @dataclass(frozen=True)
 class Orientation:

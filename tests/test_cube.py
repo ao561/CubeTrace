@@ -6,6 +6,9 @@ import pytest
 
 from cubetrace.cube import (
     CENTRES,
+    CORNERS,
+    EDGES,
+    FACE_OF,
     ORIENTATIONS,
     SOLVED,
     AmbiguousInspectionRotation,
@@ -14,11 +17,15 @@ from cubetrace.cube import (
     alg_perm,
     apply,
     compose,
+    face_with_centre,
     find_inspection_rotation,
     inverse_perm,
     is_solved,
+    opposite,
     orientation_of,
     perm_order,
+    piece_solved,
+    relative,
 )
 from cubetrace.notation import Move, invert
 
@@ -198,3 +205,47 @@ def test_finder_simple_case():
     found = find_inspection_rotation("R U", "U' F'")
     assert found == orientation_of(apply(SOLVED, "y"))
     assert found.name == "y"
+
+
+# --- Pieces and centre-relative colours ------------------------------------------------------
+def test_pieces_cover_every_non_centre_facelet_once():
+    assert len(EDGES) == 12
+    assert len(CORNERS) == 8
+    covered = [f for piece in EDGES + CORNERS for f in piece]
+    assert sorted(covered) == sorted(set(range(54)) - set(CENTRES.tolist()))
+    for piece in EDGES + CORNERS:
+        assert len({int(FACE_OF[f]) for f in piece}) == len(piece)  # one sticker per face
+
+
+def test_named_pieces():
+    # UF edge is U8 + F2; URF corner is U9 + R1 + F3 (Kociemba net).
+    assert tuple(sorted((idx("U8"), idx("F2")))) in {tuple(sorted(e)) for e in EDGES}
+    urf = tuple(sorted((idx("U9"), idx("R1"), idx("F3"))))
+    assert urf in {tuple(sorted(c)) for c in CORNERS}
+
+
+def test_pieces_stay_pieces_under_every_move():
+    piece_sets = {frozenset(p) for p in EDGES + CORNERS}
+    for base in ALL_BASES:
+        p = alg_perm(base)
+        for piece in EDGES + CORNERS:
+            assert frozenset(int(p[f]) for f in piece) in piece_sets, base
+
+
+def test_relative_removes_orientation():
+    for o in ORIENTATIONS:
+        assert np.array_equal(relative(SOLVED[o.perm]), FACE_OF), o.name
+    assert not np.array_equal(relative(apply(SOLVED, "M")), FACE_OF)
+    # R M' L' turns every layer the same way (it equals x), so it is solved relative to centres.
+    assert np.array_equal(relative(apply(SOLVED, "R M' L'")), FACE_OF)
+    assert not np.array_equal(relative(apply(SOLVED, "M' R' L x")), FACE_OF)  # = M2
+
+
+def test_piece_solved_and_face_with_centre():
+    rel = relative(apply(SOLVED, "R"))
+    uf = next(e for e in EDGES if idx("U8") in e)
+    ur = next(e for e in EDGES if idx("U6") in e)
+    assert piece_solved(rel, uf)
+    assert not piece_solved(rel, ur)
+    assert face_with_centre(apply(SOLVED, "x2"), Color.WHITE) == "URFDLB".index("D")
+    assert [opposite(f) for f in range(6)] == [3, 4, 5, 0, 1, 2]
